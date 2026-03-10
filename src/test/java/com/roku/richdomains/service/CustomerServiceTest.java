@@ -66,7 +66,8 @@ class CustomerServiceTest {
   }
 
   private static CustomerService serviceWithAccounts(String... accountIds) {
-    Customer customer = new Customer("c1", Arrays.asList(accountIds));
+    List<AccountId> accountIdList = Arrays.stream(accountIds).map(AccountId::of).toList();
+    Customer customer = new Customer(CustomerId.of("c1"), AccountIds.fromList(accountIdList));
     CustomerRepository repository = customerId -> customer;
     return new CustomerService(repository);
   }
