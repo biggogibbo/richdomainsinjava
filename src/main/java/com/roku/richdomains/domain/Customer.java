@@ -10,6 +10,10 @@ public class Customer {
   private final String id;
   private final List<String> accountIds;
 
+  public CustomerId getCustomerId() {
+    return CustomerId.of(id);
+  }
+
   public List<AccountId> getAccountIdsTyped() {
     return accountIds.stream()
         .map(AccountId::of)

@@ -3,6 +3,7 @@ package com.roku.richdomains.service;
 import com.roku.richdomains.domain.AccountId;
 import com.roku.richdomains.domain.AccountIds;
 import com.roku.richdomains.domain.Customer;
+import com.roku.richdomains.domain.CustomerId;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -10,15 +11,16 @@ public class CustomerService {
 
   private final CustomerRepository repository;
 
-  public AccountIds getExternalAccounts(String customerId) {
+  // accepts CustomerId domain object
+  public AccountIds getExternalAccounts(CustomerId customerId) {
     Customer customer = repository.findById(customerId);
-    // NEW: remove toString() and return wrapper instead of List<String>
     return customer.getAccountIdsWrapped()
         .onlyValid()
         .onlyExternal();
   }
 
-  public boolean canAccessAccount(String customerId, AccountId accountId) {
+  // accepts CustomerId domain object
+  public boolean canAccessAccount(CustomerId customerId, AccountId accountId) {
     Customer customer = repository.findById(customerId);
 
     if (!accountId.isValid()) {
@@ -30,11 +32,10 @@ public class CustomerService {
         .contains(accountId);
   }
 
-  public AccountIds getTransferEligibleAccounts(String customerId,
-                                                  AccountId excludeAccountId) {
+  // accepts CustomerId domain object
+  public AccountIds getTransferEligibleAccounts(CustomerId customerId, AccountId excludeAccountId) {
     Customer customer = repository.findById(customerId);
 
-    // NEW: remove toString() and return wrapper instead of List<String>
     return customer.getAccountIdsWrapped()
         .onlyValid()
         .exclude(excludeAccountId)
