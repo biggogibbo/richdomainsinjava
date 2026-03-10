@@ -1,7 +1,7 @@
 package com.roku.richdomains.service;
 
-import com.roku.richdomains.domain.AccountId;
 import com.roku.richdomains.domain.Customer;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,33 +17,32 @@ public class CustomerService {
     List<String> allAccountIds = customer.getAccountIds();
 
     // Validation logic in service
-    List<AccountId> validIds = new ArrayList<>();
+    List<String> validIds = new ArrayList<>();
     for (String id : allAccountIds) {
-      AccountId accountId = AccountId.of(id);
-      if (accountId.isValid()) {
-        validIds.add(accountId);
+      if (id != null && !id.isBlank() && id.matches("ACC-\\d{8}")) {
+        validIds.add(id);
       }
     }
 
     // Business logic in service
     return validIds.stream()
-        .filter(id -> !id.isInternal())
-        .map(AccountId::value)
+        .filter(id -> !id.startsWith("ACC-9"))
         .collect(Collectors.toList());
   }
 
-  public boolean canAccessAccount(String customerId, String accountIdAsString) {
+  public boolean canAccessAccount(String customerId, String accountId) {
     Customer customer = repository.findById(customerId);
     List<String> accounts = customer.getAccountIds();
 
-    AccountId accountId = AccountId.of(accountIdAsString);
-
     // Validation scattered everywhere
-    if (!accountId.isValid()) {
+    if (accountId == null || accountId.isBlank()) {
+      return false;
+    }
+    if (!accountId.matches("ACC-\\d{8}")) {
       return false;
     }
 
-    return accounts.contains(accountId.value());
+    return accounts.contains(accountId);
   }
 
   public List<String> getTransferEligibleAccounts(String customerId,
@@ -53,11 +52,10 @@ public class CustomerService {
 
     // Complex filtering logic in service
     return accounts.stream()
-        .map(AccountId::of)
-        .filter(AccountId::isValid)
-        .filter(id -> !id.value().equals(excludeAccountId))
-        .filter(id -> !id.isInternal())
-        .map(AccountId::value)
+        .filter(id -> id != null && !id.isBlank())
+        .filter(id -> id.matches("ACC-\\d{8}"))
+        .filter(id -> !id.equals(excludeAccountId))
+        .filter(id -> !id.startsWith("ACC-9"))
         .collect(Collectors.toList());
   }
 }
