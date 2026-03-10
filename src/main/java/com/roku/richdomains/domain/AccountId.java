@@ -1,16 +1,50 @@
 package com.roku.richdomains.domain;
 
-public record AccountId(String value) {
+import java.util.Optional;
 
-  public static AccountId of(String value) {
-    return new AccountId(value == null ? "" : value.trim());
+public sealed interface AccountId {
+
+  Optional<String> get();
+  String reason();
+
+  default boolean isValid() {
+    return get().isPresent();
   }
 
-  public boolean isExternal() {
-    return value != null && !value.startsWith("ACC-9");
+  static AccountId of(String value) {
+    if (value == null || value.isBlank()) {
+      return new Invalid("Account ID cannot be blank");
+    }
+    String trimmed = value.trim();
+    if (!trimmed.matches("ACC-\\d{8}")) {
+      return new Invalid("Invalid account ID format: " + trimmed);
+    }
+    return new Valid(trimmed);
   }
 
-  public boolean isValid() {
-    return value != null && !value.isBlank() && value.matches("ACC-\\d{8}");
+  default boolean isExternal() {
+    return get()
+        .map(v -> !v.startsWith("ACC-9"))
+        .orElse(false);
   }
+
+  record Valid(String value) implements AccountId {
+    @Override
+    public Optional<String> get() {
+      return Optional.of(value);
+    }
+
+    @Override
+    public String reason() {
+      return "";
+    }
+  }
+
+  record Invalid(String reason) implements AccountId {
+    @Override
+    public Optional<String> get() {
+      return Optional.empty();
+    }
+  }
+
 }
