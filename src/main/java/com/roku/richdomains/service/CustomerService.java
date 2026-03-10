@@ -1,8 +1,8 @@
 package com.roku.richdomains.service;
 
 import com.roku.richdomains.domain.AccountId;
+import com.roku.richdomains.domain.AccountIds;
 import com.roku.richdomains.domain.Customer;
-import java.util.List;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -10,18 +10,16 @@ public class CustomerService {
 
   private final CustomerRepository repository;
 
-  public List<String> getExternalAccounts(String customerId) {
+  public AccountIds getExternalAccounts(String customerId) {
     Customer customer = repository.findById(customerId);
-    // NEW: use logic in AccountIds
+    // NEW: remove toString() and return wrapper instead of List<String>
     return customer.getAccountIdsWrapped()
         .onlyValid()
-        .onlyExternal()
-        .toStrings();
+        .onlyExternal();
   }
 
-  public boolean canAccessAccount(String customerId, String accountIdAsString) {
+  public boolean canAccessAccount(String customerId, AccountId accountId) {
     Customer customer = repository.findById(customerId);
-    AccountId accountId = AccountId.of(accountIdAsString);
 
     if (!accountId.isValid()) {
       return false;
@@ -32,15 +30,14 @@ public class CustomerService {
         .contains(accountId);
   }
 
-  public List<String> getTransferEligibleAccounts(String customerId,
-                                                  String excludeAccountId) {
+  public AccountIds getTransferEligibleAccounts(String customerId,
+                                                  AccountId excludeAccountId) {
     Customer customer = repository.findById(customerId);
-    AccountId excludeId = AccountId.of(excludeAccountId);
 
+    // NEW: remove toString() and return wrapper instead of List<String>
     return customer.getAccountIdsWrapped()
         .onlyValid()
-        .exclude(excludeId)
-        .onlyExternal()
-        .toStrings();
+        .exclude(excludeAccountId)
+        .onlyExternal();
   }
 }

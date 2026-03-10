@@ -1,15 +1,15 @@
 package com.roku.richdomains.service;
 
-import com.roku.richdomains.domain.Customer;
-import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.roku.richdomains.domain.AccountId;
+import com.roku.richdomains.domain.AccountIds;
+import com.roku.richdomains.domain.Customer;
+import java.util.Arrays;
+import java.util.List;
+import org.junit.jupiter.api.Test;
 
 class CustomerServiceTest {
 
@@ -24,26 +24,28 @@ class CustomerServiceTest {
         "ACC-87654321"
     );
 
-    List<String> result = service.getExternalAccounts("c1");
+    AccountIds result = service.getExternalAccounts("c1");
 
-    assertIterableEquals(List.of("ACC-12345678", "ACC-87654321"), result);
+    AccountIds expected = AccountIds.fromList(List.of(AccountId.of("ACC-12345678"),
+        AccountId.of("ACC-87654321")));
+    assertEquals(expected, result);
   }
 
   @Test
   void canAccessAccount_returnsFalseForNullBlankOrInvalidFormat() {
     CustomerService service = serviceWithAccounts("ACC-12345678");
 
-    assertFalse(service.canAccessAccount("c1", null));
-    assertFalse(service.canAccessAccount("c1", "   "));
-    assertFalse(service.canAccessAccount("c1", "ACC-123"));
+    assertFalse(service.canAccessAccount("c1", AccountId.of(null)));
+    assertFalse(service.canAccessAccount("c1", AccountId.of("   ")));
+    assertFalse(service.canAccessAccount("c1", AccountId.of("ACC-123")));
   }
 
   @Test
   void canAccessAccount_returnsTrueWhenCustomerOwnsValidAccount() {
     CustomerService service = serviceWithAccounts("ACC-12345678", "ACC-87654321");
 
-    assertTrue(service.canAccessAccount("c1", "ACC-87654321"));
-    assertFalse(service.canAccessAccount("c1", "ACC-11111111"));
+    assertTrue(service.canAccessAccount("c1", AccountId.of("ACC-87654321")));
+    assertFalse(service.canAccessAccount("c1", AccountId.of("ACC-11111111")));
   }
 
   @Test
@@ -57,9 +59,9 @@ class CustomerServiceTest {
         null
     );
 
-    List<String> result = service.getTransferEligibleAccounts("c1", "ACC-22222222");
-
-    assertEquals(List.of("ACC-12345678"), result);
+    AccountIds result = service.getTransferEligibleAccounts("c1", AccountId.of("ACC-22222222"));
+    AccountIds expected = AccountIds.fromList(List.of(AccountId.of("ACC-12345678")));
+    assertEquals(expected, result);
   }
 
   private static CustomerService serviceWithAccounts(String... accountIds) {
