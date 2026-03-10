@@ -16,9 +16,30 @@ public class Customer {
         .toList();
   }
 
-  // NEW: Return wrapper
   public AccountIds getAccountIdsWrapped() {
     return AccountIds.fromList(getAccountIdsTyped());
+  }
+
+  // NEW: Domain logic moved from service
+  public AccountIds getExternalAccounts() {
+    return getAccountIdsWrapped()
+        .onlyValid()
+        .onlyExternal();
+  }
+
+  // NEW: Domain logic moved from service
+  public boolean hasAccount(AccountId accountId) {
+    return getAccountIdsWrapped()
+        .onlyValid()
+        .contains(accountId);
+  }
+
+  // NEW: Domain logic moved from service
+  public AccountIds getTransferEligibleAccounts(AccountId excludeAccountId) {
+    return getAccountIdsWrapped()
+        .onlyValid()
+        .exclude(excludeAccountId)
+        .onlyExternal();
   }
 
 }

@@ -11,34 +11,24 @@ public class CustomerService {
 
   private final CustomerRepository repository;
 
-  // accepts CustomerId domain object
+  // Service just delegates to domain
   public AccountIds getExternalAccounts(CustomerId customerId) {
     Customer customer = repository.findById(customerId);
-    return customer.getAccountIdsWrapped()
-        .onlyValid()
-        .onlyExternal();
+    return customer.getExternalAccounts();
   }
 
-  // accepts CustomerId domain object
+  // Service just delegates to domain
   public boolean canAccessAccount(CustomerId customerId, AccountId accountId) {
-    Customer customer = repository.findById(customerId);
-
     if (!accountId.isValid()) {
       return false;
     }
-
-    return customer.getAccountIdsWrapped()
-        .onlyValid()
-        .contains(accountId);
+    Customer customer = repository.findById(customerId);
+    return customer.hasAccount(accountId);
   }
 
-  // accepts CustomerId domain object
+  // Service just delegates to domain
   public AccountIds getTransferEligibleAccounts(CustomerId customerId, AccountId excludeAccountId) {
     Customer customer = repository.findById(customerId);
-
-    return customer.getAccountIdsWrapped()
-        .onlyValid()
-        .exclude(excludeAccountId)
-        .onlyExternal();
+    return customer.getTransferEligibleAccounts(excludeAccountId);
   }
 }
