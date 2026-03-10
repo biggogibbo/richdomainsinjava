@@ -1,5 +1,6 @@
 package com.roku.richdomains.service;
 
+import com.roku.richdomains.domain.AccountId;
 import com.roku.richdomains.domain.Customer;
 
 import java.util.ArrayList;
@@ -26,7 +27,11 @@ public class CustomerService {
 
     // Business logic in service
     return validIds.stream()
-        .filter(id -> !id.startsWith("ACC-9"))
+        // converts to domain object
+        .map(AccountId::of)
+        .filter(AccountId::isExternal)
+        // convert back to string
+        .map(AccountId::value)
         .collect(Collectors.toList());
   }
 
@@ -55,7 +60,11 @@ public class CustomerService {
         .filter(id -> id != null && !id.isBlank())
         .filter(id -> id.matches("ACC-\\d{8}"))
         .filter(id -> !id.equals(excludeAccountId))
-        .filter(id -> !id.startsWith("ACC-9"))
+        // converts to domain object
+        .map(AccountId::of)
+        .filter(AccountId::isExternal)
+        // convert back to string
+        .map(AccountId::value)
         .collect(Collectors.toList());
   }
 }
