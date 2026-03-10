@@ -40,12 +40,4 @@ public record AccountIds(List<AccountId> values) {
     return values.contains(accountId);
   }
 
-  public List<String> toStrings() {
-    return values.stream()
-        .map(AccountId::value)
-        .toList();
-  }
-
-
-
 }
