@@ -9,4 +9,8 @@ public record AccountId(String value) {
   public boolean isExternal() {
     return value != null && !value.startsWith("ACC-9");
   }
+
+  public boolean isValid() {
+    return value != null && !value.isBlank() && value.matches("ACC-\\d{8}");
+  }
 }

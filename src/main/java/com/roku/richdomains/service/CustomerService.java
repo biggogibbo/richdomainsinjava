@@ -20,7 +20,9 @@ public class CustomerService {
     // Validation logic in service
     List<String> validIds = new ArrayList<>();
     for (String id : allAccountIds) {
-      if (id != null && !id.isBlank() && id.matches("ACC-\\d{8}")) {
+      // convert to domain object for validation
+      AccountId accountId = AccountId.of(id);
+      if (accountId.isValid()) {
         validIds.add(id);
       }
     }
@@ -35,19 +37,15 @@ public class CustomerService {
         .collect(Collectors.toList());
   }
 
-  public boolean canAccessAccount(String customerId, String accountId) {
+  public boolean canAccessAccount(String customerId, String accountIdAsString) {
     Customer customer = repository.findById(customerId);
     List<String> accounts = customer.getAccountIds();
-
-    // Validation scattered everywhere
-    if (accountId == null || accountId.isBlank()) {
+    AccountId accountId = AccountId.of(accountIdAsString);
+    // Validation centralised in the domain
+    if (!accountId.isValid()) {
       return false;
     }
-    if (!accountId.matches("ACC-\\d{8}")) {
-      return false;
-    }
-
-    return accounts.contains(accountId);
+    return accounts.contains(accountId.value());
   }
 
   public List<String> getTransferEligibleAccounts(String customerId,
@@ -57,11 +55,10 @@ public class CustomerService {
 
     // Complex filtering logic in service
     return accounts.stream()
-        .filter(id -> id != null && !id.isBlank())
-        .filter(id -> id.matches("ACC-\\d{8}"))
-        .filter(id -> !id.equals(excludeAccountId))
         // converts to domain object
         .map(AccountId::of)
+        .filter(AccountId::isValid)
+        .filter(id -> !id.value().equals(excludeAccountId))
         .filter(AccountId::isExternal)
         // convert back to string
         .map(AccountId::value)
