@@ -58,7 +58,7 @@ public class CustomerService {
         // converts to domain object
         .map(AccountId::of)
         .filter(AccountId::isValid)
-        .filter(id -> !id.value().equals(excludeAccountId))
+        .filter(id -> !id.equals(AccountId.of(excludeAccountId)))
         .filter(AccountId::isExternal)
         // convert back to string
         .map(AccountId::value)
