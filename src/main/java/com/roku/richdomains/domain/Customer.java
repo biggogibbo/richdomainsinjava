@@ -10,11 +10,15 @@ public class Customer {
   private final String id;
   private final List<String> accountIds;
 
-  // NEW: Return typed list
   public List<AccountId> getAccountIdsTyped() {
     return accountIds.stream()
         .map(AccountId::of)
         .toList();
+  }
+
+  // NEW: Return wrapper
+  public AccountIds getAccountIdsWrapped() {
+    return AccountIds.fromList(getAccountIdsTyped());
   }
 
 }
