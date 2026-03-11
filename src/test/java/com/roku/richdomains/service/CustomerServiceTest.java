@@ -63,7 +63,7 @@ class CustomerServiceTest {
   }
 
   private static CustomerService serviceWithAccounts(String... accountIds) {
-    Customer customer = new Customer("c1", Arrays.asList(accountIds));
+    Customer customer = Customer.fromRawAccountIds("c1", Arrays.asList(accountIds));
     CustomerRepository repository = customerId -> customer;
     return new CustomerService(repository);
   }
